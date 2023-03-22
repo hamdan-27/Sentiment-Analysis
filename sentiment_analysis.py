@@ -9,6 +9,7 @@ data = keras.datasets.imdb
 
 word_index = data.get_word_index()
 
+# Preprocessing stage
 word_index = {k:(v+3) for k, v in word_index.items()}
 word_index["<PAD>"] = 0
 word_index["<START>"] = 1
@@ -23,8 +24,7 @@ test_data = keras.preprocessing.sequence.pad_sequences(test_data, value=word_ind
 def decode_review(text):
     return " ".join([reverse_word_index.get(i, "?") for i in text])
 
-# model starts here
-
+# Model Creation
 model = keras.Sequential()
 model.add(keras.layers.Embedding(88000, 16))
 model.add(keras.layers.GlobalAveragePooling1D())
@@ -35,18 +35,19 @@ model.summary()
 
 model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
 
+# Splitting validation data
 x_val = train_data[:10000]
 x_train = train_data[10000:]
 
 y_val = train_labels[:10000]
 y_train = train_labels[10000:]
 
+# Train the model
 fitModel = model.fit(x_train, y_train, epochs=40, batch_size=512, validation_data=(x_val, y_val), verbose=1)
 
+# Evaluate the model
 res = model.evaluate(test_data, test_labels)
 print(res)
-
-# model.save("model.h5")
 
 def review_encode(s):
     encoded = [1]
@@ -58,9 +59,11 @@ def review_encode(s):
             encoded.append(2)
     return encoded
 
-# model = keras.models.load_model("model.h5")
+# Now we test the model on external data
 
-with open(r"C:\Users\ga201\Desktop\review.txt", encoding="utf-8") as f:
+review_path = r''   #Enter your own review txt file here
+
+with open(review_path, encoding="utf-8") as f:
     for line in f.readlines():
         nline = line.replace(",", "").replace(".", "").replace("(", "").replace(")", "").replace(":", "").replace("\"", "").strip().split(" ")
         encode = review_encode(nline)
